@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 7000;
 connectDB().catch((e) => console.warn('DB connection skipped:', e?.message || e));
 
 // Middleware
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: false }));
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: false }));
 app.use(express.json({ limit: '1mb' }));
 
 // Routes
