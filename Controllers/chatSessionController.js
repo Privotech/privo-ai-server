@@ -1,8 +1,19 @@
 const Chat = require('../Models/Chat');
 const chatService = require('../Services/chatService');
+const mongoose = require('mongoose');
+
+function ensureDBConnected(res) {
+  const state = mongoose.connection.readyState; // 0=disconnected,1=connected,2=connecting,3=disconnecting
+  if (state !== 1) {
+    res.status(503).json({ ok: false, error: 'Database not connected. Set MONGO_URI in server/.env.' });
+    return false;
+  }
+  return true;
+}
 
 exports.createChat = async (req, res, next) => {
   try {
+    if (!ensureDBConnected(res)) return;
     const { title = 'New Chat' } = req.body || {};
     const chat = await Chat.create({ title, user: req.user.id, messages: [] });
     res.json({ ok: true, chat });
@@ -11,6 +22,7 @@ exports.createChat = async (req, res, next) => {
 
 exports.listChats = async (req, res, next) => {
   try {
+    if (!ensureDBConnected(res)) return;
     const chats = await Chat.find({ user: req.user.id }).sort({ updatedAt: -1 }).select('_id title updatedAt');
     res.json({ ok: true, chats });
   } catch (err) { next(err); }
@@ -18,6 +30,7 @@ exports.listChats = async (req, res, next) => {
 
 exports.getChat = async (req, res, next) => {
   try {
+    if (!ensureDBConnected(res)) return;
     const chat = await Chat.findOne({ _id: req.params.id, user: req.user.id });
     if (!chat) return res.status(404).json({ ok: false, error: 'Chat not found' });
     res.json({ ok: true, chat });
@@ -26,6 +39,7 @@ exports.getChat = async (req, res, next) => {
 
 exports.sendMessage = async (req, res, next) => {
   try {
+    if (!ensureDBConnected(res)) return;
     const { message } = req.body;
     const chat = await Chat.findOne({ _id: req.params.id, user: req.user.id });
     if (!chat) return res.status(404).json({ ok: false, error: 'Chat not found' });
@@ -47,6 +61,7 @@ exports.sendMessage = async (req, res, next) => {
 
 exports.deleteChat = async (req, res, next) => {
   try {
+    if (!ensureDBConnected(res)) return;
     const { id } = req.params;
     const chat = await Chat.findOneAndDelete({ _id: id, user: req.user.id });
     if (!chat) return res.status(404).json({ ok: false, error: 'Chat not found' });
