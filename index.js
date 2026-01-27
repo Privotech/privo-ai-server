@@ -5,6 +5,7 @@ const { connectDB } = require('./Configs/db');
 
 const app = express();
 const PORT = process.env.PORT || 7000;
+app.use(express.json());
 
 // DB
 connectDB().catch((e) => console.warn('DB connection skipped:', e?.message || e));
