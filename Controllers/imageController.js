@@ -23,9 +23,11 @@ exports.generate = async (req, res, next) => {
     }
 
     const result = await openai.images.generate({
-      model: 'gpt-image-1',
+      model: 'dall-e-3',
       prompt,
       size: '1024x1024',
+      response_format: 'b64_json',
+      n: 1,
     });
 
     const b64 = result?.data?.[0]?.b64_json;

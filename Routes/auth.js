@@ -4,11 +4,13 @@ const validate = require('../Validators/chatValidator');
 const authController = require('../Controllers/authController');
 const oauthController = require('../Controllers/oauthController');
 const requireAuth = require('../Middlewares/requireAuth');
+const requireDB = require('../Middlewares/requireDB');
 
 const router = Router();
 
 router.post(
   '/signup',
+  requireDB,
   [
     body('name').isString().trim().notEmpty(),
     body('email').isEmail().normalizeEmail(),
@@ -20,6 +22,7 @@ router.post(
 
 router.post(
   '/signin',
+  requireDB,
   [
     body('email').isEmail().normalizeEmail(),
     body('password').isString().isLength({ min: 6 }),
@@ -36,6 +39,7 @@ router.put(
   '/me',
   [
     requireAuth,
+    requireDB,
     body('name').isString().trim().notEmpty(),
   ],
   validate,
@@ -47,6 +51,7 @@ router.post(
   '/password',
   [
     requireAuth,
+    requireDB,
     body('currentPassword').isString().isLength({ min: 6 }),
     body('newPassword').isString().isLength({ min: 6 }),
   ],
@@ -56,8 +61,8 @@ router.post(
 
 // OAuth routes
 router.get('/google', oauthController.googleStart);
-router.get('/google/callback', oauthController.googleCallback);
+router.get('/google/callback', requireDB, oauthController.googleCallback);
 router.get('/github', oauthController.githubStart);
-router.get('/github/callback', oauthController.githubCallback);
+router.get('/github/callback', requireDB, oauthController.githubCallback);
 
 module.exports = router;
